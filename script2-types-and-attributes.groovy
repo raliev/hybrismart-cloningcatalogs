@@ -252,6 +252,7 @@
        partOf       = attr.getPartOf();       
        attributeTypeCode = attributeType.getCode();
        attributeTypeCode = attributeTypeCode.replace("localized:","");
+       collection   = attributeType instanceof CollectionTypeModel;
        relation     = attr.getItemtype() == "RelationDescriptor";
        (relationType, relationSourceAttr, relationTargetAttr, relationSourceAttrType, relationTargetAttrType, relationSourceAttrTypeRole, relationTargetAttrTypeRole) =
        [null,         null,               null,               null,                   null,                   null,                       null]
@@ -264,6 +265,13 @@
        // relationTargetAttrTypeRole = null;
        isSource = null;
        impexStr = "";
+       if (collection) 
+         {
+            collectionElementType    = ((CollectionTypeModel) attributeType).getElementType();
+            collectionElementTypeCode = collectionElementType.getCode();
+            if (collectionElementType instanceof ComposedTypeModel)
+              impexStr = buildImpexString(collectionElementTypeCode, []);
+         }
        if (relation) {
           relationQualifier = ((RelationDescriptorModel) attr).getQualifier();
           relationSourceAttr=  ((RelationDescriptorModel) attr).getRelationType().getSourceAttribute()?.getQualifier();
@@ -302,6 +310,13 @@
        } 
        localized    = attr.getLocalized();
        mandatory    = !attr.getOptional();
+       relationPart = SEPARATOR+        
+         (relationSourceAttr)+SEPARATOR+
+         (relationTargetAttr)+SEPARATOR+
+         (relationSourceAttrType)+SEPARATOR+
+         (relationTargetAttrType)+SEPARATOR+
+         (relationSourceAttrTypeRole)+SEPARATOR+
+         (relationTargetAttrTypeRole);
        print "\""+type+SEPARATOR+
          qualifier+SEPARATOR+
          attributeTypeCode+SEPARATOR+
@@ -312,13 +327,9 @@
          (writeable?1:0)+SEPARATOR+         
          (partOf?1:0)+SEPARATOR+
          (enumeration?1:0) + SEPARATOR +
-         (isSource)+SEPARATOR+        
-         (relationSourceAttr)+SEPARATOR+
-         (relationTargetAttr)+SEPARATOR+
-         (relationSourceAttrType)+SEPARATOR+
-         (relationTargetAttrType)+SEPARATOR+
-         (relationSourceAttrTypeRole)+SEPARATOR+
-         (relationTargetAttrTypeRole)+"\",";         
+         (isSource)+
+         //relationPart
+         "\",";         
        print "\n";
     }
   }
